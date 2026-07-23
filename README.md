@@ -21,8 +21,9 @@ die Faktenbasis.
 Es gibt zwei Oberflächen fuer dieselbe Analyse-Pipeline: eine CLI (`python -m
 lol_coach`) und eine kleine Website (`lol_coach.web`, siehe unten) — **kein Login
 noetig**, da Riot-Match-Verlauf oeffentlich abrufbar ist (siehe "Website" unten).
-Mehrere Matches/Trends ueber Zeit sind bewusst **nicht** Teil dieser Version
-(siehe "Nächste Schritte" unten).
+Die Website zeigt zusaetzlich eine **Match-Liste** (letzte 10 Spiele zum
+Anklicken) und eine **Trend-Analyse** ueber diese Matches (Win-Rate, CS/min,
+negative Findings je Kategorie ueber Zeit) - siehe "Trend-Analyse" unten.
 
 ## Setup
 
@@ -83,6 +84,31 @@ PYTHONPATH=src uvicorn lol_coach.web.app:app --reload
 Rate-Limiter) werden pro Region einmal erzeugt und wiederverwendet (Modul-Level-
 Dict in `web/app.py`), nicht pro Request neu - sonst greift das Rate-Limiting
 nicht korrekt ueber gleichzeitige Nutzer hinweg.
+
+**Flow**: `/` (Riot-ID + Region) → `/matches` (letzte 10 Spiele, `fetch.py::
+get_recent_match_summaries` - ohne Timeline-Fetch, nur `get_match` pro Match,
+guenstiger als eine volle Analyse) → entweder `/analyze?...&match=<id>` (Einzel-
+Report, wie bisher) oder `/trends?...` (Trend-Analyse ueber alle gelisteten
+Matches).
+
+## Trend-Analyse
+
+`/trends` laedt (Match + Timeline) fuer die letzten 10 Spiele, laesst dieselben
+`analyze_*`-Funktionen wie `/analyze` einmal pro Match laufen (geteilte
+Hilfsfunktion `_run_findings_pipeline` in `web/app.py`) und aggregiert die
+Ergebnisse rein regelbasiert in `analysis/trends.py`
+(`build_trend_report`) - **kein LLM-Call ueber mehrere Matches** (Kosten/Latenz-
+Entscheidung, siehe unten). Gezeigt werden Win-Rate, CS/min- und Vision-Score/min-
+Durchschnitt sowie negative Findings **pro Kategorie** (laning/vision/deaths/
+abilities/recall) je Match und aufsummiert - bewusst nicht feiner nach genauem
+Finding-Titel aufgeschluesselt, um nicht bruechig gegenueber Formulierungs-
+aenderungen in den Findings zu werden.
+
+**Performance-Hinweis**: bis zu 10 sequenzielle (Match + Timeline)-Fetches pro
+Aufruf - kann beim ersten Mal ein paar Sekunden dauern (danach durch den
+Datei-Cache unter `cache/` schneller). Kein Hintergrund-Job/Async in dieser
+Version (bewusste Vereinfachung), keine Datenbank - jeder Aufruf berechnet den
+Trend live neu.
 
 ## Deployment (Render.com)
 
@@ -213,13 +239,13 @@ nach dem Tod, keine echte "lebt bei 0 HP"-Situation).
 
 ## Nächste Schritte (nicht in diesem MVP)
 
-- Mehrere Matches / Trend-Analyse über Zeit (z.B. "deine Vermeidbare-Tode-Rate
-  sinkt seit 5 Spielen") - braucht eine Datenbank, aktuell bewusst zustandslos
+- LLM-Fazit über den Trend-Verlauf (aktuell bewusst rein regelbasiert, siehe
+  "Trend-Analyse" oben)
+- Persistenz/Datenbank für Trends (aktuell wird bei jedem Aufruf live neu
+  berechnet, gestützt auf den Datei-Cache)
+- Charts/Visualisierung für die Trend-Tabelle (aktuell reine HTML-Tabelle)
 - Video-Scrubbing zu den relevanten Momenten (Ergaenzung zum Report, kein Ersatz)
 - Echtzeit-Analyse während des Spiels
 - Feinere Rollen-Heuristiken (z.B. Jungle-Pathing-Bewertung, Support-spezifische Metriken)
 - Bezahlmodell (Stripe o.ä.), falls die Anthropic-API-Kosten bei mehr Traffic
   relevant werden
-- Tatsächliches Production-Deployment (Render-Account einrichten, Riot Production
-  Key abwarten, Domain) - Code + Anleitung stehen bereit, Ausführung ist deine
-  Entscheidung
