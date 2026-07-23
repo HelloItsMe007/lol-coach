@@ -8,6 +8,7 @@ beiden Ausgabeformaten.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 
 from ..models import Finding, MatchContext
 
@@ -17,6 +18,14 @@ def format_timestamp(seconds: int) -> str:
         return "gesamte Partie"
     m, s = divmod(seconds, 60)
     return f"{m:02d}:{s:02d}"
+
+
+def format_date(game_creation_ms: int) -> str:
+    """UTC-Datum, keine Anpassung an die Zeitzone des Betrachters (V1-Vereinfachung)."""
+    if not game_creation_ms:
+        return "unbekannt"
+    dt = datetime.fromtimestamp(game_creation_ms / 1000, tz=timezone.utc)
+    return dt.strftime("%d.%m.%Y %H:%M UTC")
 
 
 @dataclass(frozen=True)

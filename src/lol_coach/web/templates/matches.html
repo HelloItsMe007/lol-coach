@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<p>
+  <a class="back" href="/trends?riot_id={{ riot_id | urlencode }}&region={{ region | urlencode }}">
+    Trend-Analyse ueber diese {{ summaries | length }} Matches &rarr;
+  </a>
+</p>
+
+<div class="card">
+{% for s in summaries %}
+<div class="timeline-entry">
+  <a href="/analyze?riot_id={{ riot_id | urlencode }}&region={{ region | urlencode }}&match={{ s.match_id }}">
+    {{ s.game_creation_ms | date }} &mdash; {{ s.champion_name }} ({{ s.team_position or "?" }}) &mdash;
+    {{ "Sieg" if s.win else "Niederlage" }} &mdash; KDA {{ s.kills }}/{{ s.deaths }}/{{ s.assists }} &mdash;
+    {{ s.game_duration_s // 60 }} min
+  </a>
+</div>
+{% endfor %}
+</div>
+
+<a class="back" href="/">&larr; Andere Riot-ID</a>
+{% endblock %}

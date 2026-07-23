@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <strong>Trend ueber {{ report.rows | length }} Matches</strong><br>
+  Win-Rate {{ "%.0f" | format(report.win_rate * 100) }}% &middot;
+  CS/min &oslash; {{ "%.1f" | format(report.avg_cs_per_min) }} &middot;
+  Vision Score/min &oslash; {{ "%.2f" | format(report.avg_vision_score_per_min) }}
+  <br>
+  {% set totals = report.total_negative_by_category() %}
+  {% if totals %}
+  Negative Findings insgesamt:
+  {% for category, count in totals.items() %}{{ category }}: {{ count }}{% if not loop.last %}, {% endif %}{% endfor %}
+  {% endif %}
+</div>
+
+<h2>Verlauf (aeltestes zuerst)</h2>
+<div style="overflow-x:auto;">
+<table style="width:100%; border-collapse: collapse;">
+  <thead>
+    <tr style="text-align:left; border-bottom: 1px solid #8884;">
+      <th style="padding: 0.4rem;">Datum</th>
+      <th style="padding: 0.4rem;">Champion</th>
+      <th style="padding: 0.4rem;">Ergebnis</th>
+      <th style="padding: 0.4rem;">KDA</th>
+      <th style="padding: 0.4rem;">CS/min</th>
+      <th style="padding: 0.4rem;">Vision/min</th>
+      <th style="padding: 0.4rem;">Negative Findings</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in report.rows %}
+    <tr style="border-bottom: 1px solid #8882;">
+      <td style="padding: 0.4rem;">{{ row.game_creation_ms | date }}</td>
+      <td style="padding: 0.4rem;">
+        <a href="/analyze?riot_id={{ riot_id | urlencode }}&region={{ region | urlencode }}&match={{ row.match_id }}">
+          {{ row.champion_name }}
+        </a>
+      </td>
+      <td style="padding: 0.4rem;">{{ "Sieg" if row.win else "Niederlage" }}</td>
+      <td style="padding: 0.4rem;">{{ row.kills }}/{{ row.deaths }}/{{ row.assists }}</td>
+      <td style="padding: 0.4rem;">{{ "%.1f" | format(row.cs_per_min) }}</td>
+      <td style="padding: 0.4rem;">{{ "%.2f" | format(row.vision_score_per_min) }}</td>
+      <td style="padding: 0.4rem;">
+        {% for category, count in row.negative_counts.items() %}{{ category }}: {{ count }}{% if not loop.last %}, {% endif %}{% endfor %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+
+<p class="muted">
+  Regelbasiert, kein LLM-Fazit ueber den Trend (siehe README). Negative Findings
+  sind nach Kategorie gezaehlt (laning/vision/deaths/abilities/recall), nicht
+  nach genauem Finding-Titel.
+</p>
+
+<a class="back" href="/matches?riot_id={{ riot_id | urlencode }}&region={{ region | urlencode }}">&larr; Zurueck zur Match-Liste</a>
+{% endblock %}

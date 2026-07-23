@@ -10,6 +10,7 @@ from pathlib import Path
 from .models import (
     Frame,
     MatchContext,
+    MatchSummary,
     Participant,
     ParticipantFrame,
     Position,
@@ -48,6 +49,40 @@ def pick_match_id(client: RiotClient, puuid: str, match_selector: str) -> str:
     if not match_ids:
         raise RuntimeError("Keine Matches fuer diesen Account gefunden")
     return match_ids[0]
+
+
+def parse_match_summary(match_json: dict, puuid: str) -> MatchSummary:
+    info = match_json["info"]
+    p = next((p for p in info["participants"] if p["puuid"] == puuid), None)
+    if p is None:
+        raise KeyError("Kein Teilnehmer mit dieser PUUID in diesem Match gefunden")
+    return MatchSummary(
+        match_id=match_json["metadata"]["matchId"],
+        game_creation_ms=info.get("gameCreation", 0),
+        game_duration_s=info["gameDuration"],
+        champion_name=p["championName"],
+        team_position=p.get("teamPosition", ""),
+        win=p["win"],
+        kills=p["kills"],
+        deaths=p["deaths"],
+        assists=p["assists"],
+    )
+
+
+def get_recent_match_summaries(
+    client: RiotClient, puuid: str, count: int = 10, cache_dir: Path = DEFAULT_CACHE_DIR
+) -> list[MatchSummary]:
+    """Liste der letzten `count` Matches ohne Timeline-Fetch (siehe MatchSummary-
+    Docstring). Nutzt denselben Match-JSON-Cache wie fetch_match_context - ein
+    Match, das schon einzeln analysiert wurde, wird hier nicht erneut gefetcht."""
+    match_ids = client.get_match_ids(puuid, count=count)
+    summaries = []
+    for match_id in match_ids:
+        match_json = _load_or_fetch(
+            cache_dir, match_id, "", lambda mid=match_id: client.get_match(mid)
+        )
+        summaries.append(parse_match_summary(match_json, puuid))
+    return summaries
 
 
 def fetch_match_context(
@@ -133,4 +168,5 @@ def parse_match_context(match_json: dict, timeline_json: dict) -> MatchContext:
         participants=participants,
         frames=tuple(frames),
         game_version=info.get("gameVersion", ""),
+        game_creation_ms=info.get("gameCreation", 0),
     )

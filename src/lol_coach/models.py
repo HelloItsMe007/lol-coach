@@ -32,6 +32,24 @@ class Participant:
 
 
 @dataclass(frozen=True)
+class MatchSummary:
+    """Leichtgewichtige Match-Info fuer Listenansichten - ohne Timeline-Fetch,
+    da fuer eine reine Uebersicht (Champion/Ergebnis/KDA/Dauer/Datum) die
+    Timeline nicht gebraucht wird (spart den teureren Match-V5-Timeline-Call
+    pro gelistetem Match)."""
+
+    match_id: str
+    game_creation_ms: int
+    game_duration_s: int
+    champion_name: str
+    team_position: str
+    win: bool
+    kills: int
+    deaths: int
+    assists: int
+
+
+@dataclass(frozen=True)
 class ParticipantFrame:
     participant_id: int
     position: Position
@@ -90,6 +108,7 @@ class MatchContext:
     participants: tuple[Participant, ...]
     frames: tuple[Frame, ...]
     game_version: str = ""
+    game_creation_ms: int = 0
 
     def participant_by_id(self, participant_id: int) -> Participant:
         for p in self.participants:
