@@ -1,0 +1,79 @@
+{
+  "metadata": {
+    "matchId": "EUW1_1234567890",
+    "participants": ["puuid-me", "puuid-ally", "puuid-opp", "puuid-enemy2"]
+  },
+  "info": {
+    "gameDuration": 1200,
+    "participants": [
+      {
+        "participantId": 1,
+        "puuid": "puuid-me",
+        "teamId": 100,
+        "championName": "Ahri",
+        "teamPosition": "MIDDLE",
+        "win": false,
+        "kills": 2,
+        "deaths": 2,
+        "assists": 3,
+        "totalMinionsKilled": 110,
+        "neutralMinionsKilled": 0,
+        "visionScore": 10,
+        "wardsPlaced": 2,
+        "wardsKilled": 0,
+        "goldEarned": 6800
+      },
+      {
+        "participantId": 2,
+        "puuid": "puuid-ally",
+        "teamId": 100,
+        "championName": "Lee Sin",
+        "teamPosition": "JUNGLE",
+        "win": false,
+        "kills": 3,
+        "deaths": 1,
+        "assists": 5,
+        "totalMinionsKilled": 20,
+        "neutralMinionsKilled": 120,
+        "visionScore": 25,
+        "wardsPlaced": 8,
+        "wardsKilled": 2,
+        "goldEarned": 7200
+      },
+      {
+        "participantId": 3,
+        "puuid": "puuid-opp",
+        "teamId": 200,
+        "championName": "Zed",
+        "teamPosition": "MIDDLE",
+        "win": true,
+        "kills": 5,
+        "deaths": 1,
+        "assists": 2,
+        "totalMinionsKilled": 150,
+        "neutralMinionsKilled": 0,
+        "visionScore": 14,
+        "wardsPlaced": 5,
+        "wardsKilled": 1,
+        "goldEarned": 8600
+      },
+      {
+        "participantId": 4,
+        "puuid": "puuid-enemy2",
+        "teamId": 200,
+        "championName": "Elise",
+        "teamPosition": "JUNGLE",
+        "win": true,
+        "kills": 4,
+        "deaths": 0,
+        "assists": 6,
+        "totalMinionsKilled": 15,
+        "neutralMinionsKilled": 130,
+        "visionScore": 30,
+        "wardsPlaced": 10,
+        "wardsKilled": 3,
+        "goldEarned": 8100
+      }
+    ]
+  }
+}

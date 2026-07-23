@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: lol-coach
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: PYTHONPATH=src uvicorn lol_coach.web.app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: RIOT_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false

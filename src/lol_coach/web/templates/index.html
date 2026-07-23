@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+{% if error %}
+<div class="error">{{ error }}</div>
+{% endif %}
+<form action="/analyze" method="get">
+  <label for="riot_id">Riot-ID (Name#Tag)</label>
+  <input id="riot_id" name="riot_id" required value="{{ riot_id or '' }}" placeholder="z.B. JuriT04#6347">
+
+  <label for="region">Region</label>
+  <select id="region" name="region">
+    {% for r in regions %}
+    <option value="{{ r }}" {% if r == region %}selected{% endif %}>{{ r }}</option>
+    {% endfor %}
+  </select>
+
+  <label for="match">Match (optional)</label>
+  <input id="match" name="match" value="latest" placeholder="latest oder z.B. EUW1_1234567890">
+
+  <button type="submit">Analysieren</button>
+</form>
+<p class="muted">
+  Analysiert dein letztes Match automatisch anhand oeffentlicher Riot-Match-Daten.
+  Kein Login noetig - nur deine Riot-ID.
+</p>
+{% endblock %}

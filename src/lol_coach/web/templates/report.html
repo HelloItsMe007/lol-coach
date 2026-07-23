@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <strong>Match {{ ctx.match_id }}</strong> &mdash; {{ me.champion_name }} ({{ me.team_position or "?" }}) &mdash;
+  {{ "Sieg" if me.win else "Niederlage" }}<br>
+  KDA {{ me.kills }}/{{ me.deaths }}/{{ me.assists }} &middot; CS {{ me.total_cs }} &middot;
+  Vision Score {{ me.vision_score }} &middot; Dauer {{ ctx.game_duration_s // 60 }} min
+</div>
+
+{% if narrative and narrative.intro %}
+<div class="card">{{ narrative.intro }}</div>
+{% endif %}
+
+<h2>Top Verbesserungspunkte</h2>
+{% if organized.top_negatives %}
+  {% for f in organized.top_negatives %}
+  <div class="card negative">
+    <strong>[{{ f.timestamp_s | ts }}]</strong> (Impact {{ f.impact }}/5) {{ f.title }}<br>
+    {{ f.description }}
+    {% if f.tip %}<br><em>Tipp: {{ f.tip }}</em>{% endif %}
+  </div>
+  {% endfor %}
+{% else %}
+<p>Keine grossen Probleme erkannt.</p>
+{% endif %}
+
+<h2>Was gut lief</h2>
+{% if organized.top_positives %}
+  {% for f in organized.top_positives %}
+  <div class="card positive">
+    <strong>[{{ f.timestamp_s | ts }}]</strong> {{ f.title }}<br>
+    {{ f.description }}
+  </div>
+  {% endfor %}
+{% else %}
+<p>Keine auffaelligen Staerken erkannt.</p>
+{% endif %}
+
+<h2>Vollstaendige Timeline</h2>
+<div class="card">
+{% for f in organized.chronological %}
+<div class="timeline-entry">[{{ f.timestamp_s | ts }}] {{ "+" if f.valence == "positive" else "-" }} ({{ f.category }}) {{ f.title }}</div>
+{% endfor %}
+</div>
+
+{% if narrative and narrative.conclusion %}
+<h2>Coaching-Fazit</h2>
+<div class="card">{{ narrative.conclusion }}</div>
+{% endif %}
+
+{% if ability_warning %}<p class="warning">Hinweis: {{ ability_warning }}</p>{% endif %}
+{% if narrative_warning %}<p class="warning">Hinweis: {{ narrative_warning }}</p>{% endif %}
+
+<p class="muted">
+{% if narrative %}
+Die Findings/Zahlen oben basieren auf groben, regelbasierten Richtwerten (kein Video/CV).
+Das Intro/Fazit ist LLM-generiert auf Basis genau dieser Fakten und kann Kontext wie
+Cooldowns, Team-Absprachen oder Draft-Matchups nicht vollstaendig erfassen.
+{% else %}
+Alle Einschaetzungen basieren auf groben, regelbasierten Richtwerten (kein LLM, kein
+Video/CV) und koennen Kontext wie Cooldowns, Team-Absprachen oder Draft-Matchups nicht
+vollstaendig erfassen.
+{% endif %}
+</p>
+
+<a class="back" href="/">&larr; Neue Analyse</a>
+{% endblock %}

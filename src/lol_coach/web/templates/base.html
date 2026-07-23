@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}LoL Post-Game Coach{% endblock %}</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: system-ui, sans-serif; max-width: 780px; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
+  h1 { font-size: 1.4rem; }
+  h1 a { text-decoration: none; color: inherit; }
+  .card { border: 1px solid #8884; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1rem; }
+  .negative { border-left: 4px solid #d9534f; }
+  .positive { border-left: 4px solid #2e8b57; }
+  .error { border: 1px solid #d9534f; background: #d9534f22; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+  .warning { font-size: 0.85rem; color: #a86b00; }
+  label { display: block; margin-top: 0.75rem; font-weight: 600; }
+  input, select { width: 100%; padding: 0.5rem; margin-top: 0.25rem; box-sizing: border-box; }
+  button { margin-top: 1rem; padding: 0.6rem 1.2rem; font-weight: 600; cursor: pointer; }
+  .timeline-entry { font-family: ui-monospace, monospace; font-size: 0.9rem; }
+  .muted { color: #888; font-size: 0.85rem; }
+  a.back { display: inline-block; margin-top: 1rem; }
+</style>
+</head>
+<body>
+<h1><a href="/">LoL Post-Game Coach</a></h1>
+{% block content %}{% endblock %}
+</body>
+</html>
