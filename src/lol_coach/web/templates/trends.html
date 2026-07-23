@@ -13,6 +13,10 @@
   {% endif %}
 </div>
 
+{% if narrative and narrative.intro %}
+<div class="card">{{ narrative.intro }}</div>
+{% endif %}
+
 <h2>Verlauf (aeltestes zuerst)</h2>
 <div style="overflow-x:auto;">
 <table style="width:100%; border-collapse: collapse;">
@@ -49,10 +53,22 @@
 </table>
 </div>
 
+{% if narrative and narrative.conclusion %}
+<h2>Coaching-Fazit</h2>
+<div class="card">{{ narrative.conclusion }}</div>
+{% endif %}
+
+{% if narrative_warning %}<p class="warning">Hinweis: {{ narrative_warning }}</p>{% endif %}
+
 <p class="muted">
-  Regelbasiert, kein LLM-Fazit ueber den Trend (siehe README). Negative Findings
-  sind nach Kategorie gezaehlt (laning/vision/deaths/abilities/recall), nicht
-  nach genauem Finding-Titel.
+  {% if narrative %}
+  Die Kennzahlen oben sind regelbasiert. Intro/Fazit sind LLM-generiert auf Basis
+  genau dieser Kennzahlen.
+  {% else %}
+  Regelbasiert, kein LLM-Fazit (kein ANTHROPIC_API_KEY gesetzt oder Aufruf fehlgeschlagen).
+  {% endif %}
+  Negative Findings sind nach Kategorie gezaehlt (laning/vision/deaths/abilities/
+  recall), nicht nach genauem Finding-Titel.
 </p>
 
 <a class="back" href="/matches?riot_id={{ riot_id | urlencode }}&region={{ region | urlencode }}">&larr; Zurueck zur Match-Liste</a>

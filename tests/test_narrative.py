@@ -1,7 +1,13 @@
 from types import SimpleNamespace
 
-from lol_coach.analysis.narrative import _build_prompt, generate_narrative
+from lol_coach.analysis.narrative import (
+    _build_prompt,
+    _build_trend_prompt,
+    generate_narrative,
+    generate_trend_narrative,
+)
 from lol_coach.analysis.report import build_report
+from lol_coach.analysis.trends import MatchTrendRow, TrendReport
 from lol_coach.models import Finding, MatchContext, Participant
 
 
@@ -90,6 +96,39 @@ def test_generate_narrative_handles_missing_conclusion():
     result = generate_narrative(fake_client, ctx, 1, [])
     assert result["intro"] == "Nur ein einzelner Absatz ohne Trennung."
     assert result["conclusion"] == ""
+
+
+def _sample_trend_report() -> TrendReport:
+    rows = (
+        MatchTrendRow(
+            match_id="A", game_creation_ms=1000, champion_name="Xerath", win=False,
+            kills=2, deaths=6, assists=3, cs_per_min=3.0, vision_score_per_min=1.2,
+            negative_counts={"deaths": 4, "vision": 1}, positive_counts={},
+        ),
+        MatchTrendRow(
+            match_id="B", game_creation_ms=2000, champion_name="Xerath", win=True,
+            kills=8, deaths=2, assists=9, cs_per_min=4.5, vision_score_per_min=1.8,
+            negative_counts={"deaths": 1}, positive_counts={"laning": 2},
+        ),
+    )
+    return TrendReport(rows=rows)
+
+
+def test_build_trend_prompt_includes_per_match_and_summary_stats():
+    report = _sample_trend_report()
+    prompt = _build_trend_prompt(report)
+    assert "Xerath" in prompt
+    assert "deaths: 4" in prompt
+    assert "Win-Rate: 50%" in prompt
+    assert "deaths: 5" in prompt  # Summe ueber beide Matches (4+1)
+
+
+def test_generate_trend_narrative_splits_intro_and_conclusion():
+    report = _sample_trend_report()
+    fake_client = FakeClient("Deaths sind das wiederkehrende Problem.\n\nFokussiere auf Vision.")
+    result = generate_trend_narrative(fake_client, report)
+    assert result["intro"] == "Deaths sind das wiederkehrende Problem."
+    assert result["conclusion"] == "Fokussiere auf Vision."
 
 
 def test_build_report_embeds_narrative_when_present():

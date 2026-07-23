@@ -19,7 +19,7 @@ from ..analysis.ability_usage import analyze_ability_usage, death_combat_summari
 from ..analysis.ddragon import get_ability_cooldowns, resolve_version
 from ..analysis.deaths import analyze_deaths
 from ..analysis.laning import analyze_laning
-from ..analysis.narrative import generate_narrative
+from ..analysis.narrative import generate_narrative, generate_trend_narrative
 from ..analysis.recall import analyze_recall
 from ..analysis.report import format_date, format_timestamp, organize_findings
 from ..analysis.trends import build_trend_report
@@ -241,8 +241,24 @@ def trends(request: Request, riot_id: str, region: str):
         context["error"] = "Keine auswertbaren Matches gefunden."
         return templates.TemplateResponse(request, "index.html", context)
 
+    report = build_trend_report(entries)
+
+    narrative = None
+    narrative_warning = None
+    if _anthropic_client is not None:
+        try:
+            narrative = generate_trend_narrative(_anthropic_client, report)
+        except Exception as exc:  # Claude-Ausfall darf den Report nie verhindern
+            narrative_warning = f"LLM-Fazit konnte nicht erzeugt werden ({exc})"
+
     return templates.TemplateResponse(
         request,
         "trends.html",
-        {"riot_id": riot_id, "region": region, "report": build_trend_report(entries)},
+        {
+            "riot_id": riot_id,
+            "region": region,
+            "report": report,
+            "narrative": narrative,
+            "narrative_warning": narrative_warning,
+        },
     )

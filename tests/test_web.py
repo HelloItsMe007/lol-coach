@@ -25,6 +25,10 @@ def _fake_generate_narrative(client, ctx, participant_id, findings, combat_summa
     return {"intro": "TEST_INTRO", "conclusion": "TEST_FAZIT"}
 
 
+def _fake_generate_trend_narrative(client, report):
+    return {"intro": "TEST_TREND_INTRO", "conclusion": "TEST_TREND_FAZIT"}
+
+
 class FakeRiotClient:
     def get_match_ids(self, puuid, count=1):
         return ["EUW1_1234567890"]
@@ -60,6 +64,7 @@ def client(monkeypatch):
     monkeypatch.setattr(app_module, "resolve_version", _fake_resolve_version)
     monkeypatch.setattr(app_module, "_anthropic_client", object())
     monkeypatch.setattr(app_module, "generate_narrative", _fake_generate_narrative)
+    monkeypatch.setattr(app_module, "generate_trend_narrative", _fake_generate_trend_narrative)
     monkeypatch.setattr(app_module, "_get_riot_client", lambda region: FakeRiotClient())
     monkeypatch.setattr(app_module, "get_recent_match_summaries", _fake_get_recent_match_summaries)
     return TestClient(app_module.app)
@@ -114,3 +119,5 @@ def test_trends_aggregates_across_matches(client):
     assert "Trend ueber 1 Matches" in resp.text
     assert "Ahri" in resp.text
     assert "Zurueck zur Match-Liste" in resp.text
+    assert "TEST_TREND_INTRO" in resp.text
+    assert "TEST_TREND_FAZIT" in resp.text
