@@ -12,7 +12,7 @@ from pathlib import Path
 
 import anthropic
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
 
 from ..analysis.ability_usage import analyze_ability_usage, death_combat_summaries
@@ -54,6 +54,17 @@ def _get_riot_client(region: str) -> RiotClient:
             client = RiotClient(api_key=_config.riot_api_key, platform=region)
             _riot_clients[region] = client
         return client
+
+
+# Riot-Ownership-Verifizierung fuer den Production-API-Key-Antrag (Register
+# Product -> "Verify URL"). Der Wert ist kein Geheimnis, sondern soll oeffentlich
+# unter /riot.txt abrufbar sein.
+RIOT_VERIFICATION_TOKEN = "3b8a2b86-0ebf-43c9-9994-1ead433752a2"
+
+
+@app.get("/riot.txt", response_class=PlainTextResponse)
+def riot_verification() -> str:
+    return RIOT_VERIFICATION_TOKEN
 
 
 @app.get("/", response_class=HTMLResponse)
